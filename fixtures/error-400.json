@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "status": 400,
+  "headers": {
+    "Content-Type": "application/json",
+    "request-id": "req_synthetic"
+  },
+  "chunks": [
+    {
+      "delay_ms": 200,
+      "data": "{\"type\": \"error\", \"error\": {\"type\": \"invalid_request_error\", \"message\": \"messages: field required\"}, \"request_id\": \"req_synthetic\"}"
+    }
+  ]
+}

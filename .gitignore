@@ -1,0 +1,4 @@
+.env
+*.secret
+/results/raw/
+/bin/

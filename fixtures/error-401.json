@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "status": 401,
+  "headers": {
+    "Content-Type": "application/json",
+    "request-id": "req_synthetic"
+  },
+  "chunks": [
+    {
+      "delay_ms": 250,
+      "data": "{\"type\": \"error\", \"error\": {\"type\": \"authentication_error\", \"message\": \"invalid x-api-key\"}, \"request_id\": \"req_synthetic\"}"
+    }
+  ]
+}

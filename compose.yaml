@@ -1,0 +1,26 @@
+# docker compose up mock          replay fixtures on :8080
+# docker compose --profile record up record
+#                                 proxy to the real API, record fixtures.
+#                                 Reads ANTHROPIC_API_KEY from your shell.
+services:
+  mock:
+    build: ./mock
+    ports: ["8080:8080"]
+    volumes: ["./fixtures:/fixtures"]
+    environment:
+      FIXTURE_DIR: /fixtures
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 1s
+      retries: 10
+
+  record:
+    profiles: ["record"]
+    build: ./mock
+    ports: ["8080:8080"]
+    volumes: ["./fixtures:/fixtures"]
+    environment:
+      FIXTURE_DIR: /fixtures
+      UPSTREAM: https://api.anthropic.com
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN:-}
