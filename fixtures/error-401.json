@@ -1,14 +1,14 @@
 {
-  "synthetic": true,
+  "synthetic": false,
   "status": 401,
   "headers": {
     "Content-Type": "application/json",
-    "request-id": "req_synthetic"
+    "request-id": "req_011Cg7XzhAB8TSUzJNSeJd82"
   },
   "chunks": [
     {
-      "delay_ms": 250,
-      "data": "{\"type\": \"error\", \"error\": {\"type\": \"authentication_error\", \"message\": \"invalid x-api-key\"}, \"request_id\": \"req_synthetic\"}"
+      "delay_ms": 136,
+      "data": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Cg7XzhAB8TSUzJNSeJd82\"}"
     }
   ]
 }
