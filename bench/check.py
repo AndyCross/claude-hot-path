@@ -65,7 +65,45 @@ def leaderboard(files):
     w = csv.DictWriter(sys.stdout, fieldnames=list(rows[0].keys()))
     w.writeheader(); w.writerows(rows)
 
+def _resolve(tf, path):
+    """Follow symlinks inside the tar at every path component, the way the
+    loader would on disk. Debian's /bin and /lib are themselves symlinks."""
+    import posixpath
+    names = set(tf.getnames())
+    def walk(path, depth=0):
+        if depth > 40:
+            raise RuntimeError("symlink loop at " + path)
+        parts = [p for p in path.split("/") if p]
+        cur = ""
+        for i, part in enumerate(parts):
+            cur = cur + "/" + part
+            key = cur.lstrip("/")
+            if key not in names:
+                raise KeyError(cur)
+            m = tf.getmember(key)
+            if m.issym():
+                target = m.linkname if m.linkname.startswith("/") else posixpath.join(posixpath.dirname(cur), m.linkname)
+                rest = "/".join(parts[i+1:])
+                return walk(posixpath.normpath(target + ("/" + rest if rest else "")), depth + 1)
+        return tf.getmember(cur.lstrip("/"))
+    return walk(path)
+
+def sizes(tar, *paths):
+    import tarfile
+    with tarfile.open(tar) as tf:
+        for p in paths:
+            print(_resolve(tf, p).size)
+
+def toolchain(tar):
+    import tarfile
+    with tarfile.open(tar) as tf:
+        try:
+            f = tf.extractfile(_resolve(tf, "/toolchain.txt"))
+            print(";".join(l.strip() for l in f.read().decode().splitlines() if l.strip()))
+        except KeyError:
+            print("unknown")
+
 if __name__ == "__main__":
     cmd, args = sys.argv[1], sys.argv[2:]
     {"conformance": conformance, "error": error, "leaderboard": lambda *a: leaderboard(a),
-     "summarise": summarise}[cmd](*args)
+     "summarise": summarise, "sizes": sizes, "toolchain": toolchain}[cmd](*args)

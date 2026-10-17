@@ -6,4 +6,4 @@ print("| Client | Artefact | Runtime | Cold start (median) | Overhead (median) |
 print("|---|---|---|---|---|---|---|")
 for r in rows:
     print(f"| {r['client']} | {kb(r['artefact_bytes'])} | {kb(r['runtime_bytes']) if int(r['runtime_bytes']) else '0'} | "
-          f"{r['cold_start_ms_median']} ms | {r['overhead_ms_median']} ms | {int(r['max_rss_kb'])//1024} MB | {r['toolchain']} |")
+          f"{r['cold_start_ms_median']} ms | {r['overhead_ms_median']} ms | {int(r['max_rss_kb_median'])//1024} MB | {r['toolchain']} |")

@@ -58,10 +58,22 @@ measure() { # $1 client name
   local t0 t1
   t0=$(date +%s); docker build -q -t "$img" "$dir" >/dev/null; t1=$(date +%s)
   load_meta "$dir"
-  local sizes toolchain
-  # Sizes are measured inside the image so the host's binaries never count.
-  sizes=$(docker run --rm --entrypoint sh "$img" -c "stat -c '%s' $ARTIFACT $RUNTIME 2>/dev/null || stat -f '%z' $ARTIFACT $RUNTIME" | tr '\n' ' ')
-  toolchain=$(docker run --rm --entrypoint sh "$img" -c "$TOOLCHAIN_CMD" 2>/dev/null | tr '\n' ';' | sed 's/;$//')
+  local sizes toolchain libs="" tar
+  # Sizes come from the exported image, so the host's binaries never count and
+  # a scratch image with no shell still measures. For an interpreted client the
+  # shared libraries its runtime links are added too (ldd, deduplicated), so a
+  # dynamically linked curl pays for libcurl and OpenSSL just as a static
+  # binary pays for them inside itself.
+  # Scratch images have no shell; ldd then finds nothing, which is correct.
+  if docker run --rm --entrypoint sh "$img" -c true >/dev/null 2>&1; then
+    libs=$(docker run --rm --entrypoint sh "$img" -c '
+      for f in "$@"; do ldd "$f" 2>/dev/null | awk "/=> \\// {print \$3} /^\\t\\// {print \$1}"; done | sort -u' sh "$ARTIFACT" $RUNTIME | tr '\n' ' ')
+  fi
+  tar=$(mktemp); local cid
+  cid=$(docker create "$img"); docker export "$cid" > "$tar"; docker rm "$cid" >/dev/null
+  sizes=$(python3 bench/check.py sizes "$tar" "$ARTIFACT" $RUNTIME $libs | tr "\n" " ")
+  toolchain=$(python3 bench/check.py toolchain "$tar")
+  rm -f "$tar"
   echo "== $1: conformance"
   reset_stats
   local out
