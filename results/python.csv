@@ -1,0 +1,2 @@
+client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,source_lines,runs,build_s,toolchain,commit
+python,interpreted,4088,37191724,123.78,130.82,1.9,15.17,140.37,149.61,21676,90,100,2,Python 3.14.8,eb1c95d
