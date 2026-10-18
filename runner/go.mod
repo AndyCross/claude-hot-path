@@ -1,3 +1,3 @@
-module github.com/andycross/smallest-client/runner
+module github.com/andycross/claude-hot-path/runner
 
 go 1.25

@@ -100,7 +100,8 @@ def leaderboard(files):
     for f in files:
         if f.endswith("leaderboard.csv"): continue
         rows += list(csv.DictReader(open(f)))
-    rows.sort(key=lambda r: int(r["artefact_bytes"]) + int(r["runtime_bytes"]))
+    # Fastest first: the milliseconds a client adds on top of the API.
+    rows.sort(key=lambda r: float(r["client_ms_median"]))
     w = csv.DictWriter(sys.stdout, fieldnames=list(rows[0].keys()))
     w.writeheader(); w.writerows(rows)
 

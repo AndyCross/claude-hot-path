@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 ROOT=$PWD
 N=${2:-100}
 ARCH=$(docker version --format '{{.Server.Arch}}')
-NET=smallest-client
+NET=claude-hot-path
 PROMPT="What time is it in London right now?"
 
 need() { command -v "$1" >/dev/null || { echo "need $1" >&2; exit 1; }; }

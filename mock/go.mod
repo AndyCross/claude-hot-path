@@ -1,3 +1,3 @@
-module github.com/andycross/smallest-client/mock
+module github.com/andycross/claude-hot-path/mock
 
 go 1.25

@@ -1,11 +1,14 @@
-# The Smallest Client
+# Claude Hot Path
 
-A complete Claude Messages API client in one source file, in as many languages
-as people care to write it in, measured the same way every time. No SDK. The
-wire protocol is one HTTPS POST and a stream of six Server-Sent Event types,
-and each client here is the whole of it.
+The fastest way from your code to Claude. One file, no SDK.
 
-Posts about each one are at <https://stepinto.dev/smallest-client/>.
+The hot path to Claude is one HTTPS POST and a stream of six Server-Sent Event
+types. Each client here writes it by hand in one source file, in one language,
+and the harness measures what it adds on top of the API: cold start, the
+turnaround between the two requests of a tool call, memory, and size. The
+leaderboard sorts by the milliseconds added, fastest first.
+
+Posts about each one are at <https://stepinto.dev/claude-hot-path/>.
 
 ## Run it
 
@@ -72,7 +75,7 @@ client has about 11 ms in hand and a buffering one is 0.3 to 1 ms late, which
 the check catches. All timings are differences between timestamps the mock recorded and the
 runner's spawn and exit times, which share a clock because the containers share
 a kernel. Nothing is subtracted, so the mock's own sleep overshoot never counts
-against a client. The leaderboard sorts by artefact plus runtime. Nothing is
+against a client. The leaderboard sorts by `client_ms`, fastest first. Nothing is
 measured over the network: the one real exchange is for conformance, and no
 timing from it is published.
 
