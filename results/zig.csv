@@ -1,2 +1,2 @@
 client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,source_lines,runs,build_s,toolchain,commit
-zig,binary,500032,0,1.21,2.09,0.87,1.44,3.55,5.0,2396,179,3,0,zig 0.17.0,f8ee3f8
+zig,binary,500032,0,1.39,2.58,0.99,1.42,3.67,5.07,2396,179,100,1,zig 0.17.0,2b9151b

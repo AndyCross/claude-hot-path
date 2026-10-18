@@ -1,2 +1,2 @@
 client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,source_lines,runs,build_s,toolchain,commit
-rust,binary,1446848,2051728,1.16,1.23,0.76,1.27,3.22,3.98,3044,184,3,1,rustc 1.99.1 (58cf8f9c3 2026-10-13);crates: 36,f8ee3f8
+rust,binary,1446848,2051728,1.14,2.14,0.73,1.27,3.16,5.29,3108,184,100,1,rustc 1.99.1 (58cf8f9c3 2026-10-13);crates: 36,2b9151b
