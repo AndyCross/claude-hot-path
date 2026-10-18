@@ -31,13 +31,14 @@ type fixture struct {
 }
 
 type stats struct {
-	Scenario     string `json:"scenario"`
-	ReceivedNs   int64  `json:"received_unix_ns"`
-	FirstByteNs  int64  `json:"first_byte_unix_ns"`
-	DoneNs       int64  `json:"done_unix_ns"`
-	ReplayMs     int64  `json:"replay_ms"` // total of the fixture's delays: the mock's own time
-	RequestBytes int    `json:"request_bytes"`
-	Remote       string `json:"remote"` // client address:port, so a reused connection is visible
+	Scenario     string  `json:"scenario"`
+	ReceivedNs   int64   `json:"received_unix_ns"`
+	FirstByteNs  int64   `json:"first_byte_unix_ns"`
+	DoneNs       int64   `json:"done_unix_ns"`
+	ReplayMs     int64   `json:"replay_ms"` // total of the fixture's delays: the mock's own time
+	RequestBytes int     `json:"request_bytes"`
+	Remote       string  `json:"remote"`        // client address:port, so a reused connection is visible
+	ChunkNs      []int64 `json:"chunk_unix_ns"` // when each chunk was written, for the streaming check
 }
 
 var (
@@ -141,9 +142,11 @@ func messages(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(time.Duration(c.DelayMs) * time.Millisecond)
 		}
 		st.ReplayMs += c.DelayMs
+		now := time.Now().UnixNano()
 		if i == 0 {
-			st.FirstByteNs = time.Now().UnixNano()
+			st.FirstByteNs = now
 		}
+		st.ChunkNs = append(st.ChunkNs, now)
 		io.WriteString(w, c.Data)
 		if fl != nil {
 			fl.Flush()

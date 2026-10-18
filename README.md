@@ -38,7 +38,10 @@ than trusting the code.
 3. `POST /v1/messages` with headers `x-api-key`, `anthropic-version:
    2023-06-01` and `content-type: application/json`, and a body with `model`,
    `max_tokens`, `stream: true`, `messages` and `tools`.
-4. Print each `text_delta` as it arrives. Buffering the whole reply fails.
+4. Print each `text_delta` as it arrives. The bench checks that the first
+   visible byte reached stdout before the mock finished sending the stream
+   that carried it, so buffering the reply, or flushing only on newlines,
+   fails.
 5. Declare one tool, `local_time`, taking an IANA `timezone`. When the stream
    ends with `stop_reason: "tool_use"`, assemble the `input_json_delta`
    fragments, run the tool, send the `tool_result` in a second request with the
@@ -62,7 +65,11 @@ than trusting the code.
 | `source_lines` | Non-blank, non-comment lines in the one source file. Manifests (Cargo.toml, the csproj) are not counted. |
 | `build_s` | Clean image build, reported and not ranked. |
 
-All timings are differences between timestamps the mock recorded and the
+The streaming check uses the same clocks: the runner notes when the first
+non-whitespace byte reached stdout and the mock notes when it wrote each chunk,
+and the first must come before the last. On the recorded fixture a streaming
+client has about 11 ms in hand and a buffering one is 0.3 to 1 ms late, which
+the check catches. All timings are differences between timestamps the mock recorded and the
 runner's spawn and exit times, which share a clock because the containers share
 a kernel. Nothing is subtracted, so the mock's own sleep overshoot never counts
 against a client. The leaderboard sorts by artefact plus runtime. Nothing is

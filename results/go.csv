@@ -1,2 +1,2 @@
 client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,source_lines,runs,build_s,toolchain,commit
-go,binary,6095008,0,1.95,3.3,1.18,2.05,4.9,6.7,6456,156,100,1,go version go1.27.2 linux/arm64,4e0629f
+go,binary,6095008,0,1.7,1.78,1.22,1.69,4.61,5.78,6584,156,3,1,go version go1.27.2 linux/arm64,f8ee3f8

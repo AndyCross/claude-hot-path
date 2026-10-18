@@ -16,13 +16,16 @@ import (
 )
 
 type report struct {
-	SpawnUnixNs int64  `json:"spawn_unix_ns"`
-	ExitUnixNs  int64  `json:"exit_unix_ns"`
+	SpawnUnixNs int64   `json:"spawn_unix_ns"`
+	ExitUnixNs  int64   `json:"exit_unix_ns"`
 	WallMs      float64 `json:"wall_ms"`
-	MaxRSSKB    int64  `json:"max_rss_kb"`
-	ExitCode    int    `json:"exit_code"`
-	Stdout      string `json:"stdout"`
-	Stderr      string `json:"stderr"`
+	// When the first byte that is not whitespace reached stdout. A client that
+	// buffers the reply and prints it at the end has this close to its exit.
+	FirstTextUnixNs int64  `json:"first_text_unix_ns"`
+	MaxRSSKB        int64  `json:"max_rss_kb"`
+	ExitCode        int    `json:"exit_code"`
+	Stdout          string `json:"stdout"`
+	Stderr          string `json:"stderr"`
 }
 
 func main() {
@@ -34,19 +37,43 @@ func main() {
 	cmd := exec.Command(os.Args[1], os.Args[2:]...)
 	cmd.Stdin = bytes.NewReader(prompt)
 	var out, errb bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &out, &errb
+	cmd.Stderr = &errb
 	cmd.Env = os.Environ()
-	spawn := time.Now()
-	err := cmd.Start()
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
+	var firstText int64
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		buf := make([]byte, 4096)
+		for {
+			n, rerr := stdout.Read(buf)
+			if n > 0 {
+				if firstText == 0 && len(bytes.TrimSpace(buf[:n])) > 0 {
+					firstText = time.Now().UnixNano()
+				}
+				out.Write(buf[:n])
+			}
+			if rerr != nil {
+				return
+			}
+		}
+	}()
+	spawn := time.Now()
+	err = cmd.Start()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+	<-done
 	werr := cmd.Wait()
 	exit := time.Now()
 	rep := report{
 		SpawnUnixNs: spawn.UnixNano(), ExitUnixNs: exit.UnixNano(),
-		WallMs: float64(exit.Sub(spawn).Microseconds()) / 1000,
+		WallMs: float64(exit.Sub(spawn).Microseconds()) / 1000, FirstTextUnixNs: firstText,
 		Stdout: out.String(), Stderr: errb.String(),
 	}
 	if ru, ok := cmd.ProcessState.SysUsage().(*syscall.Rusage); ok {

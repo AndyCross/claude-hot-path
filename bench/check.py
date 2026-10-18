@@ -23,7 +23,20 @@ def conformance(run_json, stats_json):
     else:
         if not out.strip():
             fail("no output")
-    print("ok: two requests, streamed text matches, tool round trip completed")
+    # Streaming, not just output: the first visible byte has to reach stdout
+    # before the mock has finished sending the stream that carries it. A client
+    # that buffers the body, or flushes only on newlines, prints after `done`.
+    first = run.get("first_text_unix_ns", 0)
+    carrier = next((s for s in stats if s["scenario"] == "turn2"), stats[-1])
+    if not first:
+        fail("no visible output")
+    margin_ms = (carrier["done_unix_ns"] - first) / 1e6
+    if margin_ms <= 0:
+        fail(f"not streaming: first text reached stdout {-margin_ms:.1f} ms after the mock finished sending")
+    chunks = carrier.get("chunk_unix_ns") or []
+    before = sum(1 for c in chunks if c > first)
+    print(f"ok: two requests, streamed text matches, tool round trip completed, "
+          f"first text {margin_ms:.1f} ms before the stream ended ({before} of {len(chunks)} chunks still to come)")
 
 def error(run_json):
     run = json.loads(run_json)
