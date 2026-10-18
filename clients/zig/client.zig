@@ -96,7 +96,7 @@ fn stream(ctx: Ctx, body: json.Value) !Turn {
         .{ .name = "anthropic-version", .value = version },
         .{ .name = "content-type", .value = "application/json" },
     };
-    var req = try ctx.client.request(.POST, uri, .{ .extra_headers = &headers, .keep_alive = false });
+    var req = try ctx.client.request(.POST, uri, .{ .extra_headers = &headers });
     defer req.deinit();
     try req.sendBodyComplete(payload);
 
@@ -157,18 +157,40 @@ fn stream(ctx: Ctx, body: json.Value) !Turn {
     return .{ .content = content, .stop = stop };
 }
 
-/// std has no timezone database; the platform does. Run `date` with TZ set.
+/// std has no timezone database, but it has a TZif parser, and the platform
+/// has the database at /usr/share/zoneinfo. Read the zone's file, find the
+/// transition in force now, and format the local time.
 fn run(ctx: Ctx, block: json.Value) ![]const u8 {
     if (!std.mem.eql(u8, str(block, "name"), "local_time")) return "unknown tool";
-    const tz = if (block.object.get("input")) |in| str(in, "timezone") else "UTC";
-    var env = try ctx.env.clone(ctx.gpa);
-    defer env.deinit();
-    try env.put("TZ", tz);
-    const result = std.process.run(ctx.gpa, ctx.io, .{
-        .argv = &.{ "date", "+%Y-%m-%dT%H:%M:%S%z" },
-        .environ_map = &env,
-    }) catch return try std.mem.concat(ctx.gpa, u8, &.{ "unknown timezone ", tz });
-    return std.mem.trim(u8, result.stdout, " \r\n");
+    const tz_name = if (block.object.get("input")) |in| str(in, "timezone") else "UTC";
+    if (std.mem.indexOf(u8, tz_name, "..") != null or std.mem.startsWith(u8, tz_name, "/")) return "unknown timezone";
+    const path = try std.mem.concat(ctx.gpa, u8, &.{ "/usr/share/zoneinfo/", tz_name });
+    const file = Io.Dir.cwd().openFile(ctx.io, path, .{}) catch return try std.mem.concat(ctx.gpa, u8, &.{ "unknown timezone ", tz_name });
+    defer file.close(ctx.io);
+    var buf: [64 * 1024]u8 = undefined;
+    var reader = file.reader(ctx.io, &buf);
+    var tz = std.Tz.parse(ctx.gpa, &reader.interface) catch return "unreadable timezone file";
+    defer tz.deinit();
+
+    const now = Io.Clock.real.now(ctx.io).toSeconds();
+    var offset: i64 = 0;
+    if (tz.timetypes.len > 0) offset = tz.timetypes[0].offset;
+    for (tz.transitions) |t| {
+        if (t.ts <= now) offset = t.timetype.offset else break;
+    }
+    const local = now + offset;
+    const es: std.time.epoch.EpochSeconds = .{ .secs = @intCast(local) };
+    const day = es.getEpochDay();
+    const yd = day.calculateYearDay();
+    const md = yd.calculateMonthDay();
+    const ds = es.getDaySeconds();
+    const sign: u8 = if (offset < 0) '-' else '+';
+    const abs_off: u64 = @abs(offset);
+    return try std.fmt.allocPrint(ctx.gpa, "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}{c}{d:0>2}{d:0>2}", .{
+        yd.year, md.month.numeric(), md.day_index + 1,
+        ds.getHoursIntoDay(), ds.getMinutesIntoHour(), ds.getSecondsIntoMinute(),
+        sign, abs_off / 3600, (abs_off % 3600) / 60,
+    });
 }
 
 /// Field lookup that reads a missing or non-string field as "".

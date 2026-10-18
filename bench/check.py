@@ -33,7 +33,21 @@ def error(run_json):
         fail(f"stderr does not carry the API error message: {run['stderr'].strip()!r}")
     print(f"ok: non-zero exit, stderr: {run['stderr'].strip()}")
 
-def summarise(name, kind, sizes, toolchain, build_s, commit):
+COMMENT_PREFIXES = ("//", "#", "--", "/*", "*", "*/", "///", "//!")
+
+def source_lines(path):
+    """Non-blank lines that are not whole-line comments. A shebang counts as a
+    comment. Inline comments after code are left alone, as are block
+    comments' bodies when they do not start with '*'."""
+    n = 0
+    for line in open(path, encoding="utf-8"):
+        t = line.strip()
+        if not t or t.startswith(COMMENT_PREFIXES):
+            continue
+        n += 1
+    return n
+
+def summarise(name, kind, sizes, toolchain, build_s, commit, source=None):
     """Timings come from timestamps the mock recorded, not from subtraction,
     so the mock's own sleep overshoot never lands on the client:
       cold       spawn -> first request received
@@ -61,11 +75,12 @@ def summarise(name, kind, sizes, toolchain, build_s, commit):
     med = lambda xs: round(statistics.median(xs), 2)
     p95 = lambda xs: round(statistics.quantiles(xs, n=20)[-1], 2)
     w = csv.writer(sys.stdout)
+    loc = source_lines(source) if source else ""
     w.writerow(["client","kind","artefact_bytes","runtime_bytes",
                 "cold_start_ms_median","cold_start_ms_p95","turnaround_ms_median","tail_ms_median",
-                "client_ms_median","client_ms_p95","max_rss_kb_median","runs","build_s","toolchain","commit"])
+                "client_ms_median","client_ms_p95","max_rss_kb_median","source_lines","runs","build_s","toolchain","commit"])
     w.writerow([name, kind, artefact, runtime, med(cold), p95(cold), med(turn), med(tail),
-                med(client), p95(client), int(statistics.median(rss)), len(cold), build_s, toolchain, commit])
+                med(client), p95(client), int(statistics.median(rss)), loc, len(cold), build_s, toolchain, commit])
 
 def leaderboard(files):
     rows = []

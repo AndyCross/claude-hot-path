@@ -59,6 +59,7 @@ than trusting the code.
 | `tail_ms` | Second reply finished to exit. |
 | `client_ms` | The sum of the three: every millisecond the mock was not streaming. Median and p95. |
 | `max_rss_kb` | Peak resident memory, from the kernel's rusage for the child. |
+| `source_lines` | Non-blank, non-comment lines in the one source file. Manifests (Cargo.toml, the csproj) are not counted. |
 | `build_s` | Clean image build, reported and not ranked. |
 
 All timings are differences between timestamps the mock recorded and the

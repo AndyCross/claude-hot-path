@@ -37,6 +37,7 @@ type stats struct {
 	DoneNs       int64  `json:"done_unix_ns"`
 	ReplayMs     int64  `json:"replay_ms"` // total of the fixture's delays: the mock's own time
 	RequestBytes int    `json:"request_bytes"`
+	Remote       string `json:"remote"` // client address:port, so a reused connection is visible
 }
 
 var (
@@ -117,7 +118,7 @@ func messages(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	name := scenario(body, r.Header.Get("x-api-key"))
-	st := stats{Scenario: name, ReceivedNs: received.UnixNano(), RequestBytes: len(body)}
+	st := stats{Scenario: name, ReceivedNs: received.UnixNano(), RequestBytes: len(body), Remote: r.RemoteAddr}
 
 	var fx *fixture
 	if upstream != "" {

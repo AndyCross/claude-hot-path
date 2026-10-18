@@ -90,7 +90,7 @@ measure() { # $1 client name
     run_once "$img" test > "results/raw/$1.run"
     printf '{"run":%s,"stats":%s}\n' "$(cat results/raw/$1.run)" "$(stats)" >> "results/raw/$1.jsonl"
   done
-  python3 bench/check.py summarise "$1" "$KIND" "$sizes" "$toolchain" "$((t1-t0))" "$(git rev-parse --short HEAD 2>/dev/null || echo uncommitted)" \
+  python3 bench/check.py summarise "$1" "$KIND" "$sizes" "$toolchain" "$((t1-t0))" "$(git rev-parse --short HEAD 2>/dev/null || echo uncommitted)" "$dir/$SOURCE" \
     < "results/raw/$1.jsonl" > "results/$1.csv"
   cat "results/$1.csv"
 }
