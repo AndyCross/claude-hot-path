@@ -71,7 +71,7 @@ measure() { # $1 client name
   fi
   tar=$(mktemp); local cid
   cid=$(docker create "$img"); docker export "$cid" > "$tar"; docker rm "$cid" >/dev/null
-  sizes=$(python3 bench/check.py sizes "$tar" "$ARTIFACT" $RUNTIME $libs | tr "\n" " ")
+  sizes=$(python3 bench/check.py sizes "$tar" "$ARTIFACT" $RUNTIME ${RUNTIME_DIRS:-} $libs | tr "\n" " ")
   toolchain=$(python3 bench/check.py toolchain "$tar")
   rm -f "$tar"
   echo "== $1: conformance"

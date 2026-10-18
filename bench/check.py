@@ -113,7 +113,7 @@ def _resolve(tf, path):
     def walk(path, depth=0):
         if depth > 40:
             raise RuntimeError("symlink loop at " + path)
-        parts = [p for p in path.split("/") if p]
+        parts = [p for p in posixpath.normpath(path).split("/") if p]  # ldd prints ../lib/... paths
         cur = ""
         for i, part in enumerate(parts):
             cur = cur + "/" + part
@@ -129,10 +129,18 @@ def _resolve(tf, path):
     return walk(path)
 
 def sizes(tar, *paths):
+    """One size per path. A directory counts every regular file under it,
+    which is how an interpreter's standard library and packages are priced."""
     import tarfile
     with tarfile.open(tar) as tf:
+        members = tf.getmembers()
         for p in paths:
-            print(_resolve(tf, p).size)
+            m = _resolve(tf, p)
+            if m.isdir():
+                prefix = m.name.rstrip("/") + "/"
+                print(sum(x.size for x in members if x.isfile() and x.name.startswith(prefix)))
+            else:
+                print(m.size)
 
 def toolchain(tar):
     import tarfile

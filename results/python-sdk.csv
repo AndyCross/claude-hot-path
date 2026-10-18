@@ -1,0 +1,2 @@
+client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,source_lines,runs,build_s,toolchain,commit
+python-sdk,sdk,2451,75401172,464.62,474.29,8.65,119.81,592.47,613.54,86128,55,100,0,Python 3.14.8;anthropic 1.15.0;packages: 16,edb666c

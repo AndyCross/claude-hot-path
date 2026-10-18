@@ -86,10 +86,13 @@ runs it, and a `meta.env`:
 
 ```sh
 NAME=zig
-KIND=binary            # or interpreted
+KIND=binary            # interpreted, or sdk for an official-SDK baseline row
 ARTIFACT=/app/client   # path inside the image
-RUNTIME=''             # interpreter paths for KIND=interpreted
-TOOLCHAIN_CMD='zig version'
+RUNTIME=''             # interpreter binaries, for interpreted and sdk
+RUNTIME_DIRS=''        # directories priced whole, e.g. a stdlib and site-packages
+SOURCE=client.zig      # the one file, for the lines column
 ```
+
+Write `/toolchain.txt` in the image during the build; the bench reads it.
 
 Then `./bench/bench.sh <name>`. CI runs the mock bench on every pull request.
