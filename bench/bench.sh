@@ -45,6 +45,9 @@ run_once() { # $1 image, $2 key; prints runner JSON
 }
 
 load_meta() { # $1 client dir
+  # Clear the previous client's values first: a meta.env that omits a key must
+  # not inherit it from the client measured before.
+  unset NAME KIND ARTIFACT RUNTIME RUNTIME_DIRS SOURCE
   # shellcheck disable=SC1090
   set -a; source "$1/meta.env"; set +a
   ENTRY=()
