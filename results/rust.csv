@@ -1,2 +1,2 @@
-client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,overhead_ms_median,max_rss_kb_median,runs,build_s,toolchain,commit
-rust,binary,1446848,2051728,1.6,3.16,25.74,2980,100,17,rustc 1.99.1 (58cf8f9c3 2026-10-13);crates: 36,40d8505
+client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,runs,build_s,toolchain,commit
+rust,binary,1446848,2051728,1.62,3.43,2.99,1.25,5.7,7.57,3908,100,1,rustc 1.99.1 (58cf8f9c3 2026-10-13);crates: 36,d29075f

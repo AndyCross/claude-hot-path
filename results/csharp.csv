@@ -1,2 +1,2 @@
-client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,overhead_ms_median,max_rss_kb_median,runs,build_s,toolchain,commit
-csharp,binary,5630168,2518688,3.0,5.43,26.72,7288,100,1,dotnet SDK 10.0.402,40b54ed
+client,kind,artefact_bytes,runtime_bytes,cold_start_ms_median,cold_start_ms_p95,turnaround_ms_median,tail_ms_median,client_ms_median,client_ms_p95,max_rss_kb_median,runs,build_s,toolchain,commit
+csharp,binary,5630168,2518688,3.0,4.37,1.36,2.56,6.88,11.13,7406,100,1,dotnet SDK 10.0.402,d29075f

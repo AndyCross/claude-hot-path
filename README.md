@@ -54,14 +54,19 @@ than trusting the code.
 |---|---|
 | `artefact_bytes` | The stripped binary, or the source file for an interpreted language. |
 | `runtime_bytes` | Zero for a static binary. The interpreter and any shared runtime otherwise, measured inside the image. |
-| `cold_start_ms` | Process spawn to the mock receiving the first request. Median and p95 over the runs. |
-| `overhead_ms` | Spawn to exit, minus the time the mock spent replaying. What the client itself cost. |
+| `cold_start_ms` | Process spawn to the mock receiving the first request. Median and p95. |
+| `turnaround_ms` | First reply finished to second request received: parse the stream, run the tool, build and send the next request. |
+| `tail_ms` | Second reply finished to exit. |
+| `client_ms` | The sum of the three: every millisecond the mock was not streaming. Median and p95. |
 | `max_rss_kb` | Peak resident memory, from the kernel's rusage for the child. |
 | `build_s` | Clean image build, reported and not ranked. |
 
-The leaderboard sorts by artefact plus runtime. Nothing is measured over the
-network: the one real exchange is for conformance, and no timing from it is
-published.
+All timings are differences between timestamps the mock recorded and the
+runner's spawn and exit times, which share a clock because the containers share
+a kernel. Nothing is subtracted, so the mock's own sleep overshoot never counts
+against a client. The leaderboard sorts by artefact plus runtime. Nothing is
+measured over the network: the one real exchange is for conformance, and no
+timing from it is published.
 
 ## Add a language
 

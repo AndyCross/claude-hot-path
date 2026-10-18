@@ -34,27 +34,38 @@ def error(run_json):
     print(f"ok: non-zero exit, stderr: {run['stderr'].strip()}")
 
 def summarise(name, kind, sizes, toolchain, build_s, commit):
+    """Timings come from timestamps the mock recorded, not from subtraction,
+    so the mock's own sleep overshoot never lands on the client:
+      cold       spawn -> first request received
+      turnaround first reply finished -> second request received
+                 (parse the stream, run the tool, build and send the next request)
+      tail       second reply finished -> exit
+      client     the sum: every millisecond the mock was not streaming
+    """
     rows = [json.loads(l) for l in sys.stdin if l.strip()]
-    cold, overhead, rss = [], [], []
+    cold, turn, tail, client, rss = [], [], [], [], []
     for r in rows:
         run, st = r["run"], r["stats"]
         if run["exit_code"] != 0 or len(st) != 2:
             continue
-        first = min(s["received_unix_ns"] for s in st)
-        cold.append((first - run["spawn_unix_ns"]) / 1e6)
-        replay = sum(s["replay_ms"] for s in st)
-        overhead.append(run["wall_ms"] - replay)
+        t1, t2 = sorted(st, key=lambda s: s["received_unix_ns"])
+        c = (t1["received_unix_ns"] - run["spawn_unix_ns"]) / 1e6
+        t = (t2["received_unix_ns"] - t1["done_unix_ns"]) / 1e6
+        e = (run["exit_unix_ns"] - t2["done_unix_ns"]) / 1e6
+        cold.append(c); turn.append(t); tail.append(e); client.append(c + t + e)
         rss.append(run["max_rss_kb"])
     if not cold:
         fail("no successful runs")
     size_parts = [int(x) for x in sizes.split()]
     artefact, runtime = size_parts[0], sum(size_parts[1:])
+    med = lambda xs: round(statistics.median(xs), 2)
+    p95 = lambda xs: round(statistics.quantiles(xs, n=20)[-1], 2)
     w = csv.writer(sys.stdout)
-    w.writerow(["client","kind","artefact_bytes","runtime_bytes","cold_start_ms_median","cold_start_ms_p95",
-                "overhead_ms_median","max_rss_kb_median","runs","build_s","toolchain","commit"])
-    q = statistics.quantiles(cold, n=20)
-    w.writerow([name, kind, artefact, runtime, round(statistics.median(cold),2), round(q[-1],2),
-                round(statistics.median(overhead),2), int(statistics.median(rss)), len(cold), build_s, toolchain, commit])
+    w.writerow(["client","kind","artefact_bytes","runtime_bytes",
+                "cold_start_ms_median","cold_start_ms_p95","turnaround_ms_median","tail_ms_median",
+                "client_ms_median","client_ms_p95","max_rss_kb_median","runs","build_s","toolchain","commit"])
+    w.writerow([name, kind, artefact, runtime, med(cold), p95(cold), med(turn), med(tail),
+                med(client), p95(client), int(statistics.median(rss)), len(cold), build_s, toolchain, commit])
 
 def leaderboard(files):
     rows = []
