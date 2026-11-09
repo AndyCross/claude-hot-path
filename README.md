@@ -54,6 +54,15 @@ than trusting the code.
 7. One source file. HTTP and TLS from the platform where it has them. Where it
    does not, one named library, which counts towards size.
 
+## The tuned C# row
+
+`clients/csharp-tuned/` is the same spec written for speed rather than the
+way the templates say: libc's socket calls and hand-written HTTP/1.1 in place
+of `HttpClient`, `Utf8JsonReader` in place of `JsonNode`, bare file
+descriptors in place of `Console`, `_exit` in place of runtime shutdown, and
+a static musl build from `scratch`. It bends rule 7, so it sits on the board
+as its own row next to the stock `csharp` client rather than replacing it.
+
 ## What is measured
 
 | Column | Meaning |

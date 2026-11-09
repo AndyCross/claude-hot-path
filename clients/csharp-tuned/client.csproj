@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>client</AssemblyName>
+    <PublishAot>true</PublishAot>
+    <StripSymbols>true</StripSymbols>
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <EventSourceSupport>false</EventSourceSupport>
+    <StackTraceSupport>false</StackTraceSupport>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <IlcDisableReflection>true</IlcDisableReflection>
+    <IlcDehydrate>false</IlcDehydrate>
+    <StaticExecutable Condition="$(RuntimeIdentifier.Contains('musl'))">true</StaticExecutable>
+    <PositionIndependentExecutable Condition="$(RuntimeIdentifier.Contains('musl'))">false</PositionIndependentExecutable>
+    <StaticOpenSslLinking Condition="$(RuntimeIdentifier.Contains('musl'))">true</StaticOpenSslLinking>
+  </PropertyGroup>
+  <ItemGroup>
+    <DirectPInvoke Include="libc" />
+  </ItemGroup>
+</Project>
