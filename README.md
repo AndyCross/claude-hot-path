@@ -10,6 +10,24 @@ leaderboard sorts by the milliseconds added, fastest first.
 
 Posts about each one are at <https://stepinto.dev/claude-hot-path/>.
 
+## Results
+
+Median of 100 cold starts for each client, under Docker, against the mock server. Client time is every millisecond the mock was not streaming: cold start, turnaround and exit added together.
+
+| Client | Client time | Cold start | Turnaround | Peak memory | Ships | Lines | Post |
+|---|---|---|---|---|---|---|---|
+| [C](clients/c/) | **2.81 ms** | 1.3 ms | 0.67 ms | 6.1 MB | 2.1 MB | 271 |  |
+| [Rust](clients/rust/) | **3.16 ms** | 1.14 ms | 0.73 ms | 3.0 MB | 3.3 MB | 184 | [read](https://stepinto.dev/hot-path/a-claude-client-in-one-rust-file-and-the-first-dependency/) |
+| [C#, tuned](clients/csharp-tuned/) | **3.35 ms** | 1.67 ms | 0.73 ms | 4.3 MB | 10.4 MB | 344 | [read](https://stepinto.dev/hot-path/a-faster-c-claude-client-by-breaking-the-rules/) |
+| [Zig](clients/zig/) | **3.67 ms** | 1.39 ms | 0.99 ms | 2.3 MB | 488 KB | 179 | [read](https://stepinto.dev/hot-path/a-claude-client-in-one-zig-file-under-half-a-megabyte/) |
+| [Go](clients/go/) | **4.42 ms** | 1.73 ms | 1.1 ms | 6.4 MB | 5.8 MB | 156 | [read](https://stepinto.dev/hot-path/a-claude-client-in-one-go-file/) |
+| [C#, ahead-of-time](clients/csharp/) | **7.09 ms** | 3.01 ms | 1.4 ms | 7.1 MB | 7.8 MB | 102 | [read](https://stepinto.dev/hot-path/a-claude-client-in-one-c-file-compiled-ahead-of-time/) |
+| [bash and curl](clients/bash/) | **35.3 ms** | 6.98 ms | 19.09 ms | 11.8 MB | 23.7 MB | 75 | [read](https://stepinto.dev/hot-path/the-hot-path-to-claude-is-a-shell-script/) |
+| [Python, standard library](clients/python/) | **140.37 ms** | 123.78 ms | 1.9 ms | 21.2 MB | 35.5 MB | 90 |  |
+| [Python, official SDK](clients/python-sdk/) | **592.47 ms** | 464.62 ms | 8.65 ms | 84.1 MB | 71.9 MB | 55 |  |
+
+"Ships" is the artefact plus any runtime it needs. The Python SDK row is the reference and is not an entry: it uses the official `anthropic` package the way its documentation says. The full board, with p95 figures, toolchain versions and the commit each row was measured at, is [`results/leaderboard.csv`](results/leaderboard.csv).
+
 ## Run it
 
 ```sh
@@ -105,3 +123,7 @@ SOURCE=client.zig      # the one file, for the lines column
 Write `/toolchain.txt` in the image during the build; the bench reads it.
 
 Then `./bench/bench.sh <name>`. CI runs the mock bench on every pull request.
+
+## Licence
+
+[MIT](LICENSE).
