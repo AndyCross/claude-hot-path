@@ -36,7 +36,10 @@ Median of 100 cold starts for each client, under Docker, against the mock server
 ```
 
 You need Docker and Python 3. You do not need an API key: the mock server in
-`mock/` replays recorded exchanges with their original timing. The only step
+`mock/` replays recorded exchanges with their original timing. It is a thin
+wrapper around [claude-like-replayable](https://github.com/AndyCross/claude-like-replayable),
+which does the replaying and recording; `mock/main.go` only chooses the
+fixture and keeps the timings for `/stats`. The only step
 that talks to Anthropic is recording, which proxies one real exchange through
 the mock and saves it:
 

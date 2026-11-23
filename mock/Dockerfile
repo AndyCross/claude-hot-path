@@ -1,6 +1,7 @@
 FROM golang:1 AS build
 WORKDIR /src
-COPY go.mod ./
+COPY go.mod go.sum ./
+RUN go mod download
 COPY *.go ./
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /mock .
 
